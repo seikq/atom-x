@@ -4,18 +4,139 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ATOM-X: Academia Atómica</title>
-<meta http-equiv="refresh" content="0; url=https://litter.catbox.moe/whjhuw.html">
-<style>
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-background:#060b18;color:#7de7ff;font-family:Segoe UI,Arial,sans-serif;text-align:center;padding:24px}
-a{color:#55ddff;font-weight:bold}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div>
-  <div style="font-size:48px">⚛</div>
-  <p>Abriendo ATOM-X...</p>
-  <p>Si no abre solo, <a href="https://litter.catbox.moe/whjhuw.html">haz clic aquí</a>.</p>
+
+<canvas id="confettiCanvas"></canvas>
+
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+<div class="mascot" id="mascot" aria-hidden="true">
+    <div class="mascot-bubble" id="mascotBubble">¡Casi lo tienes!</div>
+    <div class="mascot-face" id="mascotFace">🤖</div>
 </div>
+
+<div id="app">
+
+<section id="registerScreen" class="screen active">
+<div class="logo">
+    <h1>⚛ ATOM-X</h1>
+    <p>ACADEMIA ATÓMICA</p>
+</div>
+<div class="card center">
+<h2>👨‍🚀 IDENTIFICACIÓN DEL INVESTIGADOR</h2>
+<p style="color:#91a7c4;margin-top:10px">Escribe tu nombre y crea tu avatar científico.</p>
+<div class="avatar-preview" id="avatarPreview" aria-label="Vista previa del avatar">
+    <span class="av-part" id="prevHair">👧🏼</span>
+    <span class="av-part" id="prevGlass">👚</span>
+    <span class="av-part" id="prevSuit">🎀</span>
+</div>
+<div class="avatar-section"><h4>1. Cara</h4><div class="avatar-options" id="optHair"></div></div>
+<div class="avatar-section"><h4>2. Ropa</h4><div class="avatar-options" id="optGlass"></div></div>
+<div class="avatar-section"><h4>3. Objeto</h4><div class="avatar-options" id="optSuit"></div></div>
+<input id="playerName" type="text" maxlength="20" placeholder="Escribe tu nombre..." aria-label="Nombre del investigador">
+<button class="main-btn" id="startBtn" onclick="registerPlayer()">🚀 INICIAR MISIÓN</button>
+<p class="loading-note" id="loadingNote"></p>
+</div>
+<div class="card ranking-box" style="margin-top:20px">
+    <h3>📊 Ranking de investigadores</h3>
+    <div class="ranking-list" id="registerRanking"></div>
+</div>
+</section>
+
+<section id="menuScreen" class="screen">
+<div class="game-header">
+<h2>⚛ ATOM-X</h2>
+<div class="menu-actions">
+<button class="back-btn" onclick="showAchievements()">🏆 Logros</button>
+<button class="back-btn" onclick="showRankingScreen()">📊 Ranking</button>
+<button class="back-btn" onclick="resetGame()">🔄 Reiniciar</button>
+</div>
+</div>
+<div class="hud">
+<div class="hud-box"><div class="hud-title">Investigador</div><div class="hud-value" id="hudName" style="display:flex;align-items:center;justify-content:center;gap:4px;font-size:16px">---</div></div>
+<div class="hud-box"><div class="hud-title">Puntos</div><div class="hud-value" id="hudScore">0</div></div>
+<div class="hud-box"><div class="hud-title">Fallas</div><div class="hud-value" id="hudMistakes">0 / 5</div></div>
+<div class="hud-box"><div class="hud-title">Etapa</div><div class="hud-value" id="hudStage">0 / 7</div></div>
+</div>
+<div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+<div class="card">
+<h2 style="margin-bottom:20px">🧪 SELECCIONA UNA MISIÓN</h2>
+<div class="levels" id="levelsContainer"></div>
+</div>
+</section>
+
+<section id="achievementsScreen" class="screen">
+<div class="game-header">
+<h2>🏆 LOGROS Y MEDALLAS</h2>
+<button class="back-btn" onclick="showMenu()">← Menú</button>
+</div>
+<div class="card">
+<p style="color:#91a7c4;margin-bottom:10px">Colecciona medallas completando desafíos. ¡Sigue explorando!</p>
+<div class="achievements-grid" id="achievementsGrid"></div>
+</div>
+</section>
+
+<section id="rankingScreen" class="screen">
+<div class="game-header">
+<h2>📊 RANKING</h2>
+<button class="back-btn" onclick="showMenu()">← Menú</button>
+</div>
+<div class="card ranking-box">
+<p style="color:#91a7c4;margin-bottom:12px;text-align:center">Ranking global: puntos totales, partidas por juego y repeticiones.</p>
+<div class="ranking-list" id="fullRanking"></div>
+</div>
+</section>
+
+<section id="briefingScreen" class="screen">
+<div class="card">
+<div class="briefing-icon" id="briefingIcon">🧩</div>
+<h2 class="center" id="briefingTitle" style="margin:10px 0 20px;color:#7de7ff"></h2>
+<p style="color:#c7d7ec" id="briefingObjective"></p>
+<h3 style="color:#7de7ff;margin-top:20px;margin-bottom:5px">🎯 Cómo jugar</h3>
+<ul class="briefing-steps" id="briefingSteps"></ul>
+<div class="controls" style="margin-top:25px">
+<button class="back-btn" onclick="showMenu()">← Menú</button>
+<button class="main-btn" style="flex:1;margin-top:0" onclick="beginBriefedLevel()">🚀 Comenzar</button>
+</div>
+</div>
+</section>
+
+<section id="gameScreen" class="screen">
+<div class="game-header">
+<h2 id="gameTitle">Misión</h2>
+<button class="back-btn" onclick="showMenu()">← Menú</button>
+</div>
+<div class="hud">
+<div class="hud-box"><div class="hud-title">Puntos</div><div class="hud-value" id="gameScore">0</div></div>
+<div class="hud-box"><div class="hud-title">Fallas</div><div class="hud-value" id="gameMistakes">0 / 5</div></div>
+<div class="hud-box"><div class="hud-title">Racha</div><div class="hud-value" id="streak">0</div></div>
+<div class="hud-box"><div class="hud-title">Etapa</div><div class="hud-value" id="gameStage">1</div></div>
+</div>
+<div id="comboBadge" class="combo-badge">🔥 Combo x0</div>
+<div class="power-indicators" id="powerIndicators"></div>
+<div class="card" id="gameCard">
+<div id="gameContent"></div>
+<div id="gameMessage" class="message" role="status" aria-live="polite"></div>
+</div>
+</section>
+
+<section id="finalScreen" class="screen">
+<div class="card center">
+<h1>🏆 MISIÓN COMPLETADA</h1>
+<div class="final-rank" id="finalRank">A</div>
+<h2 id="finalName"></h2>
+<div class="final-score">⭐ <span id="finalScore">0</span> PUNTOS</div>
+<p style="color:#91a7c4;margin:20px">Has completado la Academia Atómica.</p>
+<button class="main-btn" onclick="showMenu()">🚀 VOLVER AL MENÚ</button>
+</div>
+</section>
+
+</div>
+
+<script src="js0.js"></script>
+<script src="js1.js"></script>
+<script src="js2.js"></script>
 </body>
 </html>
